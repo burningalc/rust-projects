@@ -121,49 +121,44 @@ fn test_puzzle_with_ten_letters_and_199_addends() {
     );
 }
 
-#[test]
-fn test_parse_equation() {
-    let input = "I + BB == ILL";
-    let parsed = alphametics::parse_equation(input);
+// #[test]
+// fn test_parse_equation() {
+//     let input = "I + BB == ILL";
+//     let puzzle = alphametics::Puzzle::new(input);
+// }
 
-    let expected_equation = vec!["I", "BB"];
-    let expected_result = "ILL";
-    assert_eq!(parsed.0, expected_equation);
-    assert_eq!(parsed.1, expected_result);
-}
+// #[test]
+// fn test_transform_to_numbers() {
+//     let term = "ABCDE";
+//     let solution = HashMap::from([('A', 1), ('B', 2), ('C', 3), ('D', 4), ('E', 5)]);
 
-#[test]
-fn test_transform_to_numbers() {
-    let term = "ABCDE";
-    let solution = HashMap::from([('A', 1), ('B', 2), ('C', 3), ('D', 4), ('E', 5)]);
+//     let transformed_output = alphametics::transform_to_numbers(term, &solution);
 
-    let transformed_output = alphametics::transform_to_numbers(term, &solution);
+//     assert_eq!(transformed_output, Some(12345));
+// }
 
-    assert_eq!(transformed_output, Some(12345));
-}
+// #[test]
+// fn test_verify_solution() {
+//     let equation: Vec<String> = vec!["A".to_string(), "B".to_string()];
+//     let result = "C";
+//     let valid_solution = HashMap::from([('A', 1), ('B', 2), ('C', 3)]);
+//     let invalid_solution = HashMap::from([('A', 1), ('B', 2), ('C', 4)]);
 
-#[test]
-fn test_verify_solution() {
-    let equation: Vec<String> = vec!["A".to_string(), "B".to_string()];
-    let result = "C";
-    let valid_solution = HashMap::from([('A', 1), ('B', 2), ('C', 3)]);
-    let invalid_solution = HashMap::from([('A', 1), ('B', 2), ('C', 4)]);
+//     let is_valid = alphametics::verify_solution(&equation, result, &valid_solution);
+//     let is_not_valid = alphametics::verify_solution(&equation, result, &invalid_solution);
 
-    let is_valid = alphametics::verify_solution(&equation, result, &valid_solution);
-    let is_not_valid = alphametics::verify_solution(&equation, result, &invalid_solution);
+//     assert!(is_valid);
+//     assert!(!is_not_valid);
+// }
 
-    assert!(is_valid);
-    assert!(!is_not_valid);
-}
+// #[test]
+// fn test_next_solution() {
+//     let mut solution = HashMap::from([('A', 1), ('B', 2), ('C', 8)]);
+//     let expected_solution = HashMap::from([('A', 1), ('B', 2), ('C', 9)]);
+//     let expected_solution2 = HashMap::from([('A', 1), ('B', 3), ('C', 0)]);
 
-#[test]
-fn test_next_solution() {
-    let mut solution = HashMap::from([('A', 1), ('B', 2), ('C', 8)]);
-    let expected_solution = HashMap::from([('A', 1), ('B', 2), ('C', 9)]);
-    let expected_solution2 = HashMap::from([('A', 1), ('B', 3), ('C', 0)]);
-
-    let new_solution_1 = alphametics::next_solution(&solution);
-    assert_eq!(new_solution_1, expected_solution);
-    let new_solution_2 = alphametics::next_solution(&new_solution_1);
-    assert_eq!(new_solution_2, expected_solution2);
-}
+//     let new_solution_1 = alphametics::next_solution(&solution);
+//     assert_eq!(new_solution_1, expected_solution);
+//     let new_solution_2 = alphametics::next_solution(&new_solution_1);
+//     assert_eq!(new_solution_2, expected_solution2);
+// }

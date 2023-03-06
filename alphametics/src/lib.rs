@@ -1,134 +1,109 @@
-use std::collections::{BTreeMap, HashMap};
+use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 
-// struct Puzzle {
-//     solution: HashMap<char, u8>, // k: char, v: (digit, leading)
-//     used_digit: Vec<u8>,
-//     leading_char: Vec<char>,
-//     lhs_coefficient_char: HashMap<char, u8>,
-//     rhs_coefficient_char: String,
-// }
-
-// impl Puzzle {
-//     fn new(input: &str) -> Puzzle {
-//         let (lhs, rhs) = parse_equation(input);
-//         Puzzle {
-//             solution: HashMap::new(),
-//             lhs,
-//             rhs,
-//         }
-//     }
-// }
-
-// 26^10 = 141,167,095,653,376 = 141.1 trillion combinations
+// 26P10 = 19,275,223,968,000 = 19.3 trillion permutations at max
 fn brute_force_solve(input: &str) -> Option<HashMap<char, u8>> {
-    let (equation, result) = parse_equation(input);
-    let mut solution = HashMap::new();
+    let (coefficient_char, leading_char, characters) = parse_equation(input);
 
-    // insert all characters found in the equation and result into the solution
-    for term in equation.iter().chain(std::iter::once(&result)) {
-        for character in term.chars() {
-            solution.entry(character).or_insert(0);
+    // check all possible solution
+    let mut iteration_count = 0;
+    for perm in (0..=9).permutations(characters.len()) {
+        iteration_count += 1;
+        if iteration_count % 100000 == 0 {
+            println!("Iteration: {}", iteration_count);
         }
-    }
-
-    // check all possible solutions
-    let mut iterationCount = 0;
-    loop {
-        // check if the current solution is valid
-        if verify_solution(&equation, &result, &solution) {
+        if verify_solution(&coefficient_char, &leading_char, &characters, &perm) {
+            // build the hashmap to return
+            let mut solution = HashMap::new();
+            for (index, key) in characters.iter().enumerate() {
+                solution.insert(*key, perm[index]);
+            }
             return Some(solution);
         }
-
-        if solution.values().all(|&digit| digit == 9) {
-            return None;
-        }
-
-        solution = next_solution(&solution);
-        iterationCount += 1;
-
-        if iterationCount % 10000 == 0 {
-            println!("Iteration: {}", iterationCount);
-        }
     }
+
+    None
 }
 
-pub fn verify_solution(equation: &Vec<String>, result: &str, solution: &HashMap<char, u8>) -> bool {
-    // let transformed_equation = equation
-    //     .iter()
-    //     .map(|term| transform_to_numbers(term, solution).unwrap())
-    //     .collect::<Vec<u32>>();
-    // let transformed_result = transform_to_numbers(result, solution).unwrap();
-
-    let mut transformed_equation: Vec<u32> = Vec::new();
-    for term in equation {
-        let transformed_term = transform_to_numbers(term, solution);
-        match transformed_term {
-            Some(number) => transformed_equation.push(number),
-            None => return false,
+pub fn verify_solution(
+    coefficients: &Vec<i64>,
+    leading_char: &HashSet<char>,
+    characters: &Vec<char>,
+    solution: &Vec<u8>,
+) -> bool {
+    // check none of the leading char is 0
+    for (index, character) in characters.iter().enumerate() {
+        if leading_char.contains(character) && *solution.get(index).unwrap() == 0 {
+            return false;
         }
     }
-    let transformed_result = match transform_to_numbers(result, solution) {
-        Some(number) => number,
-        None => return false,
-    };
 
-    let sum: u32 = transformed_equation.iter().sum();
-
-    // check if all the number in solution is unique
-    let mut unique_digits = BTreeMap::new();
-    for digit in solution.values() {
-        unique_digits.insert(digit, 0);
+    // get the sum for coefficient_char
+    let mut sum: i64 = 0;
+    for (index, s) in solution.iter().enumerate() {
+        sum += coefficients[index] * *s as i64;
     }
 
-    unique_digits.len() == solution.len() && sum == transformed_result
+    sum == 0
 }
 
-pub fn parse_equation(input: &str) -> (Vec<String>, String) {
+/// parse the equation into data structure
+///
+/// returns (coefficient_char, leading_char, solution)
+pub fn parse_equation(input: &str) -> (Vec<i64>, HashSet<char>, Vec<char>) {
     let input_stripped = input.replace([' ', '\n'], "");
     let mut input_splitted = input_stripped.split("==");
-    let equation = input_splitted
+    let lhs = input_splitted
         .next()
         .unwrap()
         .split('+')
         .map(|s| s.to_string())
         .collect();
-    let result = input_splitted.next().unwrap();
 
-    (equation, result.to_string())
+    let rhs = input_splitted.next().unwrap();
+
+    let coefficient_char = calculate_coefficient(&lhs, rhs.to_string());
+
+    let mut concat_terms = lhs.clone();
+    concat_terms.push(rhs.to_string());
+
+    let leading_char = concat_terms
+        .clone()
+        .into_iter()
+        .map(|term| term.chars().next().unwrap())
+        .collect::<HashSet<_>>();
+
+    let solution = coefficient_char.keys().cloned().collect();
+    let coefficient = coefficient_char.values().cloned().collect();
+
+    (coefficient, leading_char, solution)
 }
 
-pub fn transform_to_numbers(term: &str, solution: &HashMap<char, u8>) -> Option<u32> {
-    let mut transformed_number = "".to_string();
-    // add each digit to the transformed number
-    for element in term.chars() {
-        let digit = solution.get(&element).unwrap();
-        transformed_number += &digit.to_string();
-    }
+pub fn calculate_coefficient(lhs: &Vec<String>, rhs: String) -> HashMap<char, i64> {
+    let mut coefficient = HashMap::new();
 
-    // check if the number has leading zero
-    match transformed_number.len() > 1 && transformed_number.starts_with('0') {
-        true => None,
-        false => Some(transformed_number.parse::<u32>().unwrap()),
-    }
-}
-
-pub fn next_solution(solution: &HashMap<char, u8>) -> HashMap<char, u8> {
-    let mut sorted_solution = solution.iter().collect::<Vec<(&char, &u8)>>();
-
-    sorted_solution.sort_by_key(|pair| pair.0);
-
-    let mut new_solution = solution.clone();
-
-    for (char, digit) in sorted_solution.iter().rev() {
-        // if digit is smaller than 9, increment it
-        if **digit < 9 {
-            new_solution.insert(**char, **digit + 1);
-            return new_solution;
+    for term in lhs {
+        let mut coefficient_multiplier = 1;
+        for character in term.chars().rev() {
+            coefficient
+                .entry(character)
+                .and_modify(|e| *e += coefficient_multiplier)
+                .or_insert(coefficient_multiplier);
+            coefficient_multiplier *= 10;
         }
-        new_solution.insert(**char, 0);
     }
 
-    new_solution
+    let mut coefficient_multiplier = 1;
+    for char in rhs.chars().rev() {
+        // insert or modify
+        coefficient
+            .entry(char)
+            .and_modify(|e| *e -= coefficient_multiplier)
+            .or_insert(-coefficient_multiplier);
+        coefficient_multiplier *= 10;
+    }
+
+    coefficient
 }
 
 pub fn solve(input: &str) -> Option<HashMap<char, u8>> {
