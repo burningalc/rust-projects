@@ -1,3 +1,4 @@
 {
-  "rust-analyzer.linkedProjects": ["./leetcode/Cargo.toml"]
+  "rust-analyzer.linkedProjects": ["./leetcode/Cargo.toml"],
+  "cSpell.words": ["waitlist"]
 }

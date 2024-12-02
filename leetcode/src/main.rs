@@ -1,3 +1,5 @@
-mod find_polygon_with_the_largest_perimeter;
+#![allow(dead_code, unused_imports)]
 
-fn main() {}
+fn main() {
+    println!("Hello, world!");
+}
