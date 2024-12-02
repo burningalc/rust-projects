@@ -15,10 +15,9 @@ impl Solution {
     pub fn is_prefix_of_word(sentence: String, search_word: String) -> i32 {
         match sentence
             .split(" ")
-            .enumerate()
-            .find(|(_, word)| word.starts_with(&search_word))
+            .position(|word| word.starts_with(&search_word))
         {
-            Some((idx, _)) => idx as i32 + 1,
+            Some(idx) => idx as i32 + 1,
             None => -1,
         }
     }
