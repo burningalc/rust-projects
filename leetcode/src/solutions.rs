@@ -11,6 +11,7 @@ pub mod q0740_delete_and_earn;
 pub mod q0746_min_cost_climbing_stairs;
 pub mod q0839_similar_string_groups;
 pub mod q1095_find_in_mountain_array;
+pub mod q1346_check_if_n_and_its_double_exist;
 pub mod q1455_check_if_a_word_occurs_as_a_prefix_of_any_word_in_a_sentence;
 pub mod q1491_average_salary_excluding_the_minimum_and_maximum_salary;
 pub mod q1579_remove_max_number_of_edges_to_keep_graph_fully_traversable;
